@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Kartu Kendali</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+        }
+        .camera-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Kartu Kendali</h1>
+                <p class="text-gray-600">Masuk ke akun Anda</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+                    Masuk
+                </button>
+            </form>
+            
+            <div id="loginError" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden">
+                Email atau password salah
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">Kartu Kendali</h1>
+                        <span class="ml-4 text-sm text-gray-600">Selamat datang, <span id="userName"></span></span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="showFormBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition duration-200">
+                            + Tambah Data
+                        </button>
+                        <button id="logoutBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition duration-200">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Form Modal -->
+        <div id="formModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="min-h-screen flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Tambah Data Survei</h2>
+                        <button id="closeFormBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    
+                    <form id="surveyForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Survei</label>
+                                <div class="relative">
+                                    <input type="text" id="namaSurvei" required 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Ketik untuk mencari...">
+                                    <div id="surveyDropdown" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto hidden">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Responden</label>
+                                <div class="relative">
+                                    <input type="text" id="namaResponden" required 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Ketik untuk mencari...">
+                                    <div id="respondenDropdown" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto hidden">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto</label>
+                            <div class="space-y-4">
+                                <input type="file" id="fotoInput" accept="image/*" capture="camera"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <div id="fotoPreview" class="hidden">
+                                    <img id="previewImage" class="camera-preview border border-gray-300" alt="Preview foto">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal</label>
+                                <input type="text" id="tanggal" readonly 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Jam</label>
+                                <input type="text" id="jam" readonly 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
+                                <input type="text" id="lokasi" readonly 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                                       placeholder="Mengambil lokasi...">
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-4 pt-4">
+                            <button type="button" id="cancelBtn" 
+                                    class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition duration-200">
+                                Batal
+                            </button>
+                            <button type="submit" 
+                                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition duration-200">
+                                Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="bg-white rounded-xl shadow-sm border">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Data Survei Bulan Ini</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Survei</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responden</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Data akan dimuat di sini -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="noDataMessage" class="text-center py-12 text-gray-500">
+                    Belum ada data survei bulan ini
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sample data untuk simulasi database
+        const sampleUsers = [
+            { email: 'admin@test.com', password: '123456', nama: 'Administrator' },
+            { email: 'user@test.com', password: 'password', nama: 'User Demo' }
+        ];
+
+        const sampleSurveys = [
+            'Survei Kepuasan Pelanggan',
+            'Survei Kualitas Produk',
+            'Survei Layanan Purna Jual',
+            'Survei Pengalaman Pengguna',
+            'Survei Feedback Website'
+        ];
+
+        const sampleResponden = [
+            'Ahmad Wijaya',
+            'Siti Nurhaliza',
+            'Budi Santoso',
+            'Maya Sari',
+            'Dedi Kurniawan',
+            'Rina Permata',
+            'Agus Setiawan',
+            'Lina Marlina'
+        ];
+
+        let currentUser = null;
+        let surveyData = JSON.parse(localStorage.getItem('surveyData')) || [];
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = sampleUsers.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('userName').textContent = user.nama;
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                loadData();
+                document.getElementById('loginError').classList.add('hidden');
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            currentUser = null;
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+        });
+
+        // Modal controls
+        document.getElementById('showFormBtn').addEventListener('click', function() {
+            document.getElementById('formModal').classList.remove('hidden');
+            setCurrentDateTime();
+            getCurrentLocation();
+        });
+
+        document.getElementById('closeFormBtn').addEventListener('click', closeModal);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+        function closeModal() {
+            document.getElementById('formModal').classList.add('hidden');
+            document.getElementById('surveyForm').reset();
+            document.getElementById('fotoPreview').classList.add('hidden');
+        }
+
+        // Dropdown functionality for Nama Survei
+        const namaSurveiInput = document.getElementById('namaSurvei');
+        const surveyDropdown = document.getElementById('surveyDropdown');
+
+        namaSurveiInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const filtered = sampleSurveys.filter(survey => 
+                survey.toLowerCase().includes(query)
+            );
+            
+            if (filtered.length > 0 && query) {
+                surveyDropdown.innerHTML = filtered.map(survey => 
+                    `<div class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectSurvey('${survey}')">${survey}</div>`
+                ).join('');
+                surveyDropdown.classList.remove('hidden');
+            } else {
+                surveyDropdown.classList.add('hidden');
+            }
+        });
+
+        function selectSurvey(survey) {
+            namaSurveiInput.value = survey;
+            surveyDropdown.classList.add('hidden');
+        }
+
+        // Dropdown functionality for Nama Responden
+        const namaRespondenInput = document.getElementById('namaResponden');
+        const respondenDropdown = document.getElementById('respondenDropdown');
+
+        namaRespondenInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const filtered = sampleResponden.filter(responden => 
+                responden.toLowerCase().includes(query)
+            );
+            
+            if (filtered.length > 0 && query) {
+                respondenDropdown.innerHTML = filtered.map(responden => 
+                    `<div class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectResponden('${responden}')">${responden}</div>`
+                ).join('');
+                respondenDropdown.classList.remove('hidden');
+            } else {
+                respondenDropdown.classList.add('hidden');
+            }
+        });
+
+        function selectResponden(responden) {
+            namaRespondenInput.value = responden;
+            respondenDropdown.classList.add('hidden');
+        }
+
+        // Hide dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#namaSurvei') && !e.target.closest('#surveyDropdown')) {
+                surveyDropdown.classList.add('hidden');
+            }
+            if (!e.target.closest('#namaResponden') && !e.target.closest('#respondenDropdown')) {
+                respondenDropdown.classList.add('hidden');
+            }
+        });
+
+        // Photo preview
+        document.getElementById('fotoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('fotoPreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Set current date and time
+        function setCurrentDateTime() {
+            const now = new Date();
+            const tanggal = now.toLocaleDateString('id-ID');
+            const jam = now.toLocaleTimeString('id-ID');
+            
+            document.getElementById('tanggal').value = tanggal;
+            document.getElementById('jam').value = jam;
+        }
+
+        // Get current location
+        function getCurrentLocation() {
+            const lokasiInput = document.getElementById('lokasi');
+            lokasiInput.value = 'Mengambil lokasi...';
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        lokasiInput.value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                    },
+                    function(error) {
+                        lokasiInput.value = 'Lokasi tidak tersedia';
+                    }
+                );
+            } else {
+                lokasiInput.value = 'Geolocation tidak didukung';
+            }
+        }
+
+        // Form submission
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                id: Date.now(),
+                nama_survei: document.getElementById('namaSurvei').value,
+                nama_responden: document.getElementById('namaResponden').value,
+                foto: document.getElementById('previewImage').src || '',
+                tanggal: document.getElementById('tanggal').value,
+                jam: document.getElementById('jam').value,
+                location: document.getElementById('lokasi').value,
+                email_user: currentUser.email,
+                nama_user: currentUser.nama,
+                created_at: new Date()
+            };
+            
+            surveyData.push(formData);
+            localStorage.setItem('surveyData', JSON.stringify(surveyData));
+            
+            closeModal();
+            loadData();
+            
+            // Show success message
+            alert('Data survei berhasil disimpan!');
+        });
+
+        // Load and display data
+        function loadData() {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            const filteredData = surveyData.filter(item => {
+                const itemDate = new Date(item.created_at);
+                return item.email_user === currentUser.email &&
+                       itemDate.getMonth() === currentMonth &&
+                       itemDate.getFullYear() === currentYear;
+            });
+            
+            const tableBody = document.getElementById('dataTableBody');
+            const noDataMessage = document.getElementById('noDataMessage');
+            
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '';
+                noDataMessage.classList.remove('hidden');
+            } else {
+                noDataMessage.classList.add('hidden');
+                tableBody.innerHTML = filteredData.map((item, index) => `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.nama_survei}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.nama_responden}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${item.foto ? '<span class="text-green-600">✓ Ada foto</span>' : '<span class="text-gray-400">Tidak ada</span>'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.tanggal}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.jam}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.location}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Initialize datetime on page load
+        setCurrentDateTime();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985a9f050528d8ca',t:'MTc1ODk3MjEyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
